@@ -182,12 +182,25 @@ combined_valley_analysis <- plot_grid(col_type, valley_FROH, ncol = 2, labels = 
 # save multiplot
 ggsave("Up and Down Valley Multiplot.png", combined_valley_analysis, width = 10, height = 5, units = "in", dpi=1600, bg="white")
 
+############################################################################
+
 # make a map to show where colonies are
 
+# load in map
 shp_map <- st_read("/Users/bethanysuliguin/Documents/EEB331/marmot_polygons_wgs84.shp")
 shp_map <- st_transform(shp_map, 3857)
-esri_tiles <- get_tiles(shp_map, provider = "Esri.WorldImagery", zoom = 15)
 
+# remove unrepresented colonies
+shp_map <- shp_map |> 
+  filter(Site != "Cliff") |> 
+  filter(Site != "Avery") |> 
+  filter(Site != "Bellview") |> 
+  filter(Site != "Stonefield")
+
+# load in satellite image
+esri_tiles <- get_tiles(shp_map, provider = "Esri.WorldImagery", zoom = 16)
+
+# make the plot
 colony_map <- ggplot() +
   layer_spatial(esri_tiles) +
   geom_sf(data = shp_map, fill = NA, color = "red", linewidth = 0.5) +
